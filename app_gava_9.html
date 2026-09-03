@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nou CAP a Gavà - Cerca el teu centre</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px 35px;
+        }
+        h1 {
+            color: #005f8a;
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .subtitle {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 25px;
+            font-weight: 400;
+        }
+        .subtitle strong {
+            color: #005f8a;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #dce4ec;
+            border-radius: 40px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-group input:focus {
+            border-color: #00a3d0;
+            box-shadow: 0 0 0 4px rgba(0, 163, 208, 0.15);
+        }
+        .input-group button {
+            padding: 14px 28px;
+            background: #00a3d0;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .input-group button:hover {
+            background: #007fa3;
+            transform: scale(1.02);
+        }
+        .intro-text {
+            color: #4a6a7f;
+            margin-bottom: 25px;
+            font-size: 15px;
+            border-left: 4px solid #00a3d0;
+            padding-left: 15px;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px 25px;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            display: none;
+        }
+        .result.success {
+            display: block;
+            border-left: 6px solid #2b8c5e;
+            background: #f0faf5;
+        }
+        .result.error {
+            display: block;
+            border-left: 6px solid #c53030;
+            background: #fff5f5;
+        }
+        .result .cap-nom {
+            font-size: 24px;
+            font-weight: 700;
+            color: #005f8a;
+        }
+        .result .cap-centre {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-top: 2px;
+        }
+        .result .cap-adreca {
+            margin-top: 8px;
+            color: #2d3748;
+            font-size: 16px;
+        }
+        .result .barris {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .result .barris summary {
+            font-weight: 600;
+            color: #2d3748;
+            cursor: pointer;
+        }
+        .result .barris ul {
+            margin-top: 8px;
+            padding-left: 20px;
+            list-style: disc;
+            color: #4a6a7f;
+        }
+        .result .barris ul li {
+            margin-bottom: 4px;
+        }
+        .error-msg {
+            color: #c53030;
+            font-weight: 500;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #4a6a7f;
+            text-align: center;
+            border-top: 1px solid #edf2f7;
+            padding-top: 20px;
+            line-height: 1.6;
+        }
+        .footer a {
+            color: #00a3d0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .footer .linia-separada {
+            display: block;
+            margin-top: 2px;
+        }
+        @media (max-width: 500px) {
+            .container { padding: 20px; }
+            .input-group { flex-direction: column; }
+            .input-group button { width: 100%; }
+            h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏥 Gavà suma un nou CAP!</h1>
+    <div class="subtitle">Consulta aquí quin <strong>CAP</strong> et correspon segons la teva adreça:</div>
+
+    <div class="input-group">
+        <input type="text" id="adrecaInput" placeholder="Ex: Carrer de la Pau, 23" autofocus>
+        <button id="cercarBtn">Cercar</button>
+    </div>
+
+    <div class="intro-text">
+        Amb la redistribució de zones, t'ajudem a saber el teu centre d'atenció primària de referència. Introdueix el teu carrer i número.
+    </div>
+
+    <div id="result" class="result">
+        <div id="resultContent"></div>
+    </div>
+
+    <div class="footer">
+        Dades orientatives basades en l'assignació de centre per zona geogràfica.
+        <span class="linia-separada">Per a més informació dirigeix-te al taulell del teu CAP o truca al <a href="tel:061">061</a>.</span>
+    </div>
+</div>
+
+<script>
+    // ---------- DADES DELS CAP ----------
+    const CAPS = [
+        { "ABS": "CAP Gavà 1", "Centre": "CAP Gavà", "Adreça": "Av. de la Riera de Sant Llorenç, 103, 08850 Gavà, Barcelona", "Barris": ["Bruguers", "Can Tries- Can Tintorer- Can Pere Bori", "Les Colomeres i Santa Teresa", "Centre (parcial)"] },
+        { "ABS": "CAP Gavà 2", "Centre": "CAP Dr. Bartomeu Fabrés i Anglada", "Adreça": "Carrer de la Riera de les Parets, 7, 08850 Gavà, Barcelona", "Barris": ["Centre (parcial)", "Barceloneta", "Àngela Roca i Can Serra Balet", "Gavà Mar"] },
+        { "ABS": "CAP Gavà 3", "Centre": "CAP Can Ribes - Ernest Lluch", "Adreça": "Avinguda vuit de març, 08850 Gavà, Barcelona", "Barris": ["Can Ribes", "Bòbiles", "La Sentiu", "Ca n'Espinós"] }
+    ];
+
+    // ---------- DADES DELS CARRERS (TOTES LES PESTANYES) ----------
+    const CARRERS = [
+        // -------- GAVÀ 1 ----------
+        {"carrer":"Avinguda de Joan XXIII","parells":"2-14","senars":"1-9","cap":"CAP Gavà 1"},
+        {"carrer":"Avinguda d'Eramprunyà","parells":"2-54","senars":"1-79","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer d'Antoni Gaudí","parells":"2-10","senars":"1-49","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de B. Carles Aribau","parells":"2-6","senars":null,"cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Begues","parells":"2-12","senars":"1-23","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Ca n'Aimeric","parells":"2-10","senars":null,"cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Cal Fuentes","parells":"2-10","senars":"1-9","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Can Gairal","parells":null,"senars":"1-29","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Can Margarit","parells":"2-12","senars":"1-13","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Can Mas","parells":"2-20","senars":"1-21","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Can Perers","parells":"2-16","senars":"1-11","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Can Rascló","parells":"2-16","senars":"1-9","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Can Tardà","parells":"2-12","senars":"1-11","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Can Tries","parells":"2-14","senars":null,"cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Clara Campoamor","parells":"2-8","senars":"1-17","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de F. Garcia Lorca","parells":"2-18","senars":"1-17","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de F. Pi i Margall","parells":"2-52","senars":"1-59","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Francesc Viñas","parells":"2-6","senars":"1-19","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de J. Lamote de Grignon","parells":"2-74","senars":"1-13","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Jaume I","parells":"2-6","senars":"1-7","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Joan I","parells":"2-22","senars":"1-5","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Joan Manén","parells":"2-16","senars":"1-15","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Juli Garreta","parells":"2-16","senars":"1-13","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de la Concòrdia","parells":"24-30","senars":"17-51","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de la Mare de Déu de Bruguers","parells":"2-52","senars":"1-19","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de la Mare de Déu de Montserrat","parells":"38-98","senars":"35-135","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de la Mare de Déu dels Dolors","parells":"52-70","senars":null,"cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de la Riera de Sant Llorenç","parells":null,"senars":"77-239","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de l'Àngel","parells":"2-32","senars":"1-11","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de les Alzines","parells":"2","senars":"1-3","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de les Colomeres","parells":"66-158","senars":"135-179","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de l'Hostal de l'Ase","parells":"2-16","senars":"1-7","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Lluís Millet","parells":"2-20","senars":"1-21","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Marc Grau","parells":"2-8","senars":"1-17","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Mas Cortils","parells":"2-4","senars":null,"cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Montflorit","parells":"136-196","senars":"133-189","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Montserrat Roig","parells":"2-14","senars":"1-3","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Narcís Monturiol","parells":"2-4","senars":"1-3","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Pau Casals","parells":"2-12","senars":"1-7","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Pau Claris","parells":"28-112","senars":"81-109","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Pep Ventura","parells":"2-8","senars":"1-11","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Pere el Gran","parells":"2-4","senars":"1-5","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Rafael Casanova","parells":"2-6","senars":"1-5","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Roger de Flor","parells":"6-38","senars":"1-29","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Salvador Lluch","parells":"22-30","senars":"23-29","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Sant Isidre","parells":"24-68","senars":"21-89","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Sant Joan","parells":"14-86","senars":"29-61","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Sant Josep","parells":"2-20","senars":"1-11","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Sant Lluís","parells":"2-44","senars":"1-39","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Sant Martí","parells":"2-16","senars":"1-11","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Sant Nicasi","parells":"36-92","senars":"35-81","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Santa Teresa","parells":"2-78","senars":"1-37","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Tresols","parells":"2-50","senars":"1-45","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer de Vicenç Bou","parells":"2-18","senars":"1-17","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Celler","parells":"2","senars":"1-7","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Centre","parells":"2-62","senars":null,"cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Mediterrani","parells":"2-52","senars":null,"cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Riu Anoia","parells":"2-32","senars":"1-29","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Riu Besòs","parells":"2-28","senars":"1-41","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Riu Ebre","parells":"2-18","senars":"1-19","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Riu Fluvià","parells":"2-32","senars":"1-33","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Riu Francolí","parells":"2-8","senars":"1","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Riu Llobregat","parells":"2-10","senars":"1-11","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Riu Segre","parells":"2-8","senars":"1-21","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Riu Ter","parells":"2-20","senars":"1-23","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer del Segle XX","parells":"2-42","senars":"1-41","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer dels Garrofers","parells":"2-36","senars":"1-31","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer d'Enric Granados","parells":"2-16","senars":"1-17","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer d'Enric Morera","parells":"2-8","senars":"1-9","cap":"CAP Gavà 1"},
+        {"carrer":"Carrer d'Isaac Albéniz","parells":"2-16","senars":"1-13","cap":"CAP Gavà 1"},
+        {"carrer":"Carretera de Begues BV-2041","parells":null,"senars":null,"cap":"CAP Gavà 1"},
+        {"carrer":"Passatge d'Almeria","parells":"2-8","senars":"1-9","cap":"CAP Gavà 1"},
+        {"carrer":"Passatge de Dolors Clua","parells":"2-16","senars":"1-13","cap":"CAP Gavà 1"},
+        {"carrer":"Passatge de Mallorca","parells":"2-10","senars":"1-7","cap":"CAP Gavà 1"},
+        {"carrer":"Plaça d'Amadeu Vives","parells":"2-6","senars":"1-5","cap":"CAP Gavà 1"},
+        {"carrer":"Plaça de Catalunya","parells":"2-12","senars":"1-13","cap":"CAP Gavà 1"},
+        {"carrer":"Plaça de Dolors Clua","parells":"2-14","senars":"1-13","cap":"CAP Gavà 1"},
+        {"carrer":"Plaça de J.M. Batista i Roca","parells":"2-10","senars":"1-11","cap":"CAP Gavà 1"},
+        {"carrer":"Plaça de Jaume Perich","parells":null,"senars":"1","cap":"CAP Gavà 1"},
+        {"carrer":"Plaça de la Font Groga","parells":"2-4","senars":"1-5","cap":"CAP Gavà 1"},
+        {"carrer":"Plaça de Magdalena Trias","parells":"2-22","senars":"1-23","cap":"CAP Gavà 1"},
+        {"carrer":"Rambla de Maria Casas","parells":"88-122","senars":"79","cap":"CAP Gavà 1"},
+        {"carrer":"Rambla de Pompeu Fabra","parells":"126-196","senars":"81-157","cap":"CAP Gavà 1"},
+        {"carrer":"Travessia de Sant Nicasi","parells":"2-24","senars":"1-13","cap":"CAP Gavà 1"},
+        // -------- GAVÀ 2 ----------
+        {"carrer":"Autovia de Castelldefels","parells":"36-170","senars":"43-139","cap":"CAP Gavà 2"},
+        {"carrer":"Avinguda de Bertran i Güell","parells":"2-86","senars":"1-63","cap":"CAP Gavà 2"},
+        {"carrer":"Avinguda de Joan Carles I","parells":"2-4","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Avinguda del Mar","parells":"2-12","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Avinguda del Mas Sellarès","parells":"2-32","senars":"1-33","cap":"CAP Gavà 2"},
+        {"carrer":"Avinguda d'Europa","parells":"2-118","senars":"1-163","cap":"CAP Gavà 2"},
+        {"carrer":"Camí de la Pava","parells":"2-9999","senars":"1-9999","cap":"CAP Gavà 2"},
+        {"carrer":"Camí de la Pineda","parells":null,"senars":"1-53","cap":"CAP Gavà 2"},
+        {"carrer":"Camí de les Labors Agrícoles","parells":"2-9999","senars":"1-9999","cap":"CAP Gavà 2"},
+        {"carrer":"Camí del Pinar","parells":"2-9999","senars":"1-9999","cap":"CAP Gavà 2"},
+        {"carrer":"Camí del Regàs","parells":"2-4","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer Carrer que no passa","parells":"2-10","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Alacant","parells":"2-18","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Alcanar","parells":null,"senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Amposta","parells":"2-10","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Andorra","parells":"2-18","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Àngel Guimerà","parells":"2-24","senars":"1-29","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Àngela Roca","parells":"2-10","senars":"1-19","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Antoni Rovira i Virgili","parells":"2-16","senars":"1-21","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Apel·les Mestres","parells":"2-38","senars":"1-25","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Arenys","parells":"2-10","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Artur Costa","parells":"2-70","senars":"1-55","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de B. Carles Aribau","parells":null,"senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Barcelona","parells":null,"senars":"1-47","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Begur","parells":"2-6","senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Blanes","parells":"2-8","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Cadaqués","parells":"2-10","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Calafell","parells":"2-32","senars":"1-27","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Castelldefels","parells":"2-16","senars":"1-21","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Castelló","parells":"2-8","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Copèrnic","parells":"2-4","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Cubelles","parells":"2-24","senars":"1-23","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Cunit","parells":"2-86","senars":"1-89","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de F. Rius i Taulet","parells":"2-62","senars":"1-63","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Fortià Casanovas","parells":"2-14","senars":"1-25","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Galileo","parells":"12-42","senars":"11-17","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Garraf","parells":"2-20","senars":"1-13","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Girona","parells":"2-20","senars":"1-25","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Gregal","parells":"2-14","senars":"1-5","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Joaquim Folguera","parells":"2-32","senars":"1-53","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Josep Lluís Sert","parells":"2-54","senars":"1-41","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Josep Torres Clavé","parells":"2-14","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Ciència","parells":"2-38","senars":"1-49","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Ciutat del Repòs","parells":"2-8","senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Concòrdia","parells":"2-22","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Creativitat","parells":"2-16","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Fassina del Moliner","parells":"2-14","senars":"1-19","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Forja","parells":"2-6","senars":"1-33","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Gavina","parells":"2","senars":"1","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Generalitat de Catalunya","parells":"2-22","senars":"1-13","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Imaginació","parells":"2-24","senars":"1-17","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Indústria","parells":"2-30","senars":"1-17","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Màquina","parells":"2-66","senars":"1-65","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Mare de Déu de la Mercè","parells":"2-30","senars":"1-41","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Mare de Déu de Montserrat","parells":"2-36","senars":"1-33","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Marinada","parells":null,"senars":"1-9999","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Post","parells":"2-26","senars":"1-27","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Recerca","parells":null,"senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Rectoria","parells":"2-20","senars":"1-9","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Riera de les Parets","parells":"2-22","senars":"1-33","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Riera de Sant Llorenç","parells":null,"senars":"1-75","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Roda","parells":"2-14","senars":"1-5","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Tècnica","parells":"2","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de la Tecnologia","parells":"2-4","senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Alba","parells":"2-4","senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Alguer","parells":"2-20","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Ametlla","parells":"2-16","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Ampolla","parells":"2-16","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Arena","parells":"2-12","senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Àtom","parells":null,"senars":"1-29","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Energia","parells":"2-38","senars":"1-35","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Enginy","parells":"2-34","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Leonardo da Vinci","parells":"2-6","senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de les Colomeres","parells":"2-64","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de les Moreres","parells":"2-32","senars":"1-25","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Escala","parells":"2-6","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Escala","parells":null,"senars":"1-9","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Horitzó","parells":"2-8","senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Llançà","parells":"2","senars":"1-5","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Lleida","parells":"2-18","senars":"1-13","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de l'Orient","parells":"2-4","senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Mestral","parells":"2-4","senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Miquel Servet","parells":"10-24","senars":"9-35","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Montflorit","parells":"2-16","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Palafrugell","parells":"2-20","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Palamós","parells":"2-20","senars":"1-21","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Premià","parells":"2","senars":"1-5","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Roselló","parells":"2-6","senars":"1-17","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Roses","parells":"2-22","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Salamanca","parells":"2-72","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Salou","parells":null,"senars":"1-9","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Salvador Lluch","parells":"2-20","senars":"1-21","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sant Antoni Abad","parells":"2-24","senars":"1-35","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sant Feliu","parells":null,"senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sant Isidre","parells":"2-22","senars":"1-19","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sant Joan","parells":"2-12","senars":"1-27","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sant Josep Oriol","parells":"2-10","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sant Nicasi","parells":"2-34","senars":"1-29","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sant Pere","parells":"2-84","senars":"1-83","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Santiago Rusiñol","parells":"2-24","senars":"1-17","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sarrià","parells":"2-46","senars":"1-19","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Sitges","parells":"2-16","senars":"1-17","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Tamarit","parells":"2-6","senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Tarragona","parells":"2-48","senars":"1-33","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de València","parells":"2-8","senars":"1-9","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Vandellòs","parells":"2-8","senars":"1-13","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Víctor Balaguer","parells":"2-22","senars":"1-21","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Vila i Vilà","parells":"2-34","senars":"1-37","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer de Viladecans","parells":"2-16","senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Eivissa","parells":"2-16","senars":"1-5","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Cap de Creus","parells":"2-32","senars":"1-41","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Centre","parells":null,"senars":"1-67","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Comerç","parells":null,"senars":"1-21","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Comte d'Urgell","parells":"2-28","senars":"1-21","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Coneixement","parells":"2-10","senars":"1-15","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Disseny","parells":null,"senars":"1-5","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Progrés","parells":"2-78","senars":"1-69","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Raval de Molins","parells":"2-40","senars":"1-21","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Rourell","parells":"30-40","senars":"31-37","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer del Vapor","parells":"2-18","senars":"1-9","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer dels Màrtirs del Setge de 1714","parells":"2-34","senars":"1-37","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer dels Nou Rals","parells":null,"senars":"1-7","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer dels Oficis","parells":"2-10","senars":"1-33","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer dels Rierals","parells":"2-18","senars":"1-13","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer dels Tellinaires","parells":"2-172","senars":"1-61","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer dels Usatges de Barcelona","parells":"1-16","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'enSerrat","parells":null,"senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Isaac Peral","parells":null,"senars":"1-17","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer d'Olocau","parells":"2-14","senars":"1-9","cap":"CAP Gavà 2"},
+        {"carrer":"Carrer Major","parells":"2-36","senars":"1-39","cap":"CAP Gavà 2"},
+        {"carrer":"Carretera de Santa Creu de Calafell","parells":"2-154","senars":"1-137","cap":"CAP Gavà 2"},
+        {"carrer":"Passatge de la Rambla","parells":"2-18","senars":"1-17","cap":"CAP Gavà 2"},
+        {"carrer":"Passatge de l'American Lake","parells":"2-12","senars":"1-11","cap":"CAP Gavà 2"},
+        {"carrer":"Passatge de Sarrià","parells":"2-12","senars":"1-5","cap":"CAP Gavà 2"},
+        {"carrer":"Passatge Transversal","parells":"2-22","senars":"1-31","cap":"CAP Gavà 2"},
+        {"carrer":"Passeig de Joan Maragall","parells":"2-12","senars":"1-13","cap":"CAP Gavà 2"},
+        {"carrer":"Passeig del Ferrocarril","parells":"370-376","senars":"375-385","cap":"CAP Gavà 2"},
+        {"carrer":"Passeig Marítim","parells":"2-54","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Plaça de la Constitució","parells":"6","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Plaça de la Llibertat","parells":"2-10","senars":null,"cap":"CAP Gavà 2"},
+        {"carrer":"Plaça de Leonardo da Vinci","parells":"2","senars":"1","cap":"CAP Gavà 2"},
+        {"carrer":"Plaça de les Panes","parells":"1-53","senars":"2-54","cap":"CAP Gavà 2"},
+        {"carrer":"Plaça de l'Església","parells":"2-4","senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Plaça de l'Estació","parells":null,"senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Plaça de Mossèn Jacint Verdaguer","parells":"2-4","senars":"1-5","cap":"CAP Gavà 2"},
+        {"carrer":"Plaça de Pablo Neruda","parells":"2","senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Plaça Major","parells":"2-4","senars":"1-3","cap":"CAP Gavà 2"},
+        {"carrer":"Rambla de Joaquim Vayreda","parells":"14-68","senars":"21-71","cap":"CAP Gavà 2"},
+        {"carrer":"Rambla de Maria Casas","parells":"70-86","senars":"73-77","cap":"CAP Gavà 2"},
+        {"carrer":"Rambla de Salvador Lluch","parells":"2-12","senars":"1-19","cap":"CAP Gavà 2"},
+        // -------- GAVÀ 3 ----------
+        {"carrer":"Avinguda de Joan Carles I","parells":"30-62","senars":"1-37","cap":"CAP Gavà 3"},
+        {"carrer":"Avinguda de la Muntanya","parells":"2-18","senars":"1-15","cap":"CAP Gavà 3"},
+        {"carrer":"Avinguda de les Bòbiles","parells":"2-30","senars":"1-9","cap":"CAP Gavà 3"},
+        {"carrer":"Avinguda del Vuit de Març","parells":"2-48","senars":"1-39","cap":"CAP Gavà 3"},
+        {"carrer":"Avinguda d'Eramprunyà","parells":null,"senars":"81-103","cap":"CAP Gavà 3"},
+        {"carrer":"Avinguda Diagonal","parells":"2-26","senars":"1-25","cap":"CAP Gavà 3"},
+        {"carrer":"Camí de Ca n'Espinós","parells":null,"senars":"1-5","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer Carreró","parells":"2-4","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer d'Àngel Guimerà","parells":"26-38","senars":"31-37","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer d'Apel·les Mestres","parells":"40-76","senars":"27-63","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer d'Ausiàs Marc","parells":"2-12","senars":"1-7","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Bernat Metge","parells":"2-32","senars":"1-27","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de F. Pi i Margall","parells":"54-64","senars":"61-101","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Garbí","parells":"2-14","senars":"1-13","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Granada","parells":"2-10","senars":"1-7","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Guifré el Pelós","parells":"2-14","senars":"1-7","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de J. Ventura i Tort","parells":"2-16","senars":"1-17","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Jaume Huguet","parells":"2-14","senars":"1-11","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Joan Carles I","parells":"2-28","senars":null,"cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Joanot Martorell","parells":"2-44","senars":"1-39","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Joaquim Folguera","parells":"34-66","senars":"55-73","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Josefa Ramon i Salla","parells":"2","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Cova Fosca","parells":"2-12","senars":"1-7","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Falconera","parells":"2-4","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Farigola","parells":"2-24","senars":"1-19","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Flama","parells":null,"senars":"1-19","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Floresta","parells":"2-12","senars":"1-15","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Font","parells":"2-30","senars":"1-25","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Llenya","parells":"2","senars":null,"cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Mare de Déu dels Dolors","parells":"2-50","senars":"1-57","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Morella","parells":"2-6","senars":"1-23","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Pau","parells":"2-6","senars":"1-9","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Salut","parells":"2-34","senars":"1-9","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Torrentera","parells":"2-12","senars":"1-15","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de la Tramuntana","parells":"2-4","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de l'Argila","parells":"2-10","senars":null,"cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de les Colomeres","parells":null,"senars":"1-133","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de l'Espígol","parells":"2","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Lluís Borrassà","parells":"2-62","senars":"1-69","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Lluís Dalmau","parells":"2-46","senars":"1-47","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Lluís Solé i Sabarís","parells":"2-38","senars":"1-33","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de l'Olivera","parells":"2-6","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Manuel Carrasco i Formiguera","parells":"2-12","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Manuel de Falla","parells":"2-10","senars":"1-13","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Montflorit","parells":"18-134","senars":"1-131","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Pau Claris","parells":"2-26","senars":"1-79","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Pau Vergós","parells":"2-92","senars":"1-65","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Ramon Llull","parells":"2-44","senars":"1-45","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Ramon Muntaner","parells":"2","senars":"1-11","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Sant Lluís","parells":"46-72","senars":"41-79","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Sant Martí","parells":"2-46","senars":"1-33","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Sant Pere","parells":"86-118","senars":"85-105","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Santa Teresa","parells":"80-112","senars":"39-97","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Santiago Rusiñol","parells":"26-36","senars":"19-35","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Tresols","parells":"52-98","senars":"47-89","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer de Xaloc","parells":"2-14","senars":"1-7","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del Cardener","parells":"2-10","senars":"1-13","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del Centre","parells":"64-68","senars":"69","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del Dr. Fernando Sauri","parells":"2","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del Foc","parells":"2-8","senars":"1-5","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del General J. Moragues","parells":"2-18","senars":"1-29","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del Mediterrani","parells":null,"senars":"1-49","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del Pou","parells":"2-42","senars":"1-5","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del Segle XX","parells":"44-62","senars":"43-53","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer del Treball","parells":"2-58","senars":"1-69","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer dels Brucs","parells":"2-30","senars":"1-23","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer dels Obradors","parells":"2-10","senars":"1-15","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer dels Pins","parells":"2-8","senars":"1-5","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer dels Rajolers","parells":"2","senars":"1-25","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer dels Teulers","parells":"2-22","senars":"1-25","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer Principal","parells":"2-32","senars":"1-17","cap":"CAP Gavà 3"},
+        {"carrer":"Carrer Tallat","parells":"2-10","senars":"1-23","cap":"CAP Gavà 3"},
+        {"carrer":"Carretera de la Sentiu","parells":"2-22","senars":"1-59","cap":"CAP Gavà 3"},
+        {"carrer":"Carretera de Santa Creu de Calafell","parells":null,"senars":null,"cap":"CAP Gavà 3"},
+        {"carrer":"Passatge de Flora Tristán","parells":"2","senars":null,"cap":"CAP Gavà 3"},
+        {"carrer":"Passatge de la Casa de la Vila","parells":"2","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Passatge de Marta Mata","parells":null,"senars":"1-5","cap":"CAP Gavà 3"},
+        {"carrer":"Passatge de Martí L'Humà","parells":"2-8","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Passatge de Pablo R. Picasso","parells":"2-10","senars":"1-17","cap":"CAP Gavà 3"},
+        {"carrer":"Passatge de Santa Eulàlia","parells":"2-4","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Passatge de Sevilla","parells":"2-8","senars":"1-13","cap":"CAP Gavà 3"},
+        {"carrer":"Passatge d'Elisenda de Montcada","parells":"2-6","senars":"1-7","cap":"CAP Gavà 3"},
+        {"carrer":"Passatge Interior","parells":"2-18","senars":"1-13","cap":"CAP Gavà 3"},
+        {"carrer":"Passeig de Joan Maragall","parells":"14-26","senars":"15-25","cap":"CAP Gavà 3"},
+        {"carrer":"Passeig de la Terracuita","parells":"2-8","senars":"1-7","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça de Jaume Balmes","parells":"2-8","senars":"1-9","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça de la Constitució","parells":"2-4","senars":"1-5","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça de la Cova Bonica","parells":"2-4","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça de la Ginesta","parells":"2","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça de les Treze Roses","parells":"2-8","senars":null,"cap":"CAP Gavà 3"},
+        {"carrer":"Plaça de Pere Marc","parells":null,"senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça del Bosc","parells":"2-4","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça del Montseny","parells":"2","senars":"1","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça del Pare Poveda","parells":"2-8","senars":"1-9","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça del Primer de Maig","parells":"2-8","senars":"1-9","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça del Racó","parells":"2","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça del Repòs","parells":"2-4","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça del Romaní","parells":"2","senars":"1-3","cap":"CAP Gavà 3"},
+        {"carrer":"Plaça Interior","parells":"1-23","senars":"2-24","cap":"CAP Gavà 3"}
+    ];
+
+
+    // ---------- FUNCIONS DE NORMALITZACIÓ MILLORADA ----------
+    function normalitzar(text) {
+        // 1. Minúscules i treure accents
+        text = text.toLowerCase();
+        text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        // 2. Convertir ç a c (per equiparar "març" i "marc")
+        text = text.replace(/ç/g, 'c');
+
+        // 3. Convertir paraules numèriques a dígits
+        const numerics = {
+            'zero': '0', 'un': '1', 'dos': '2', 'tres': '3', 'quatre': '4',
+            'cinc': '5', 'sis': '6', 'set': '7', 'vuit': '8', 'nou': '9',
+            'deu': '10', 'onze': '11', 'dotze': '12', 'tretze': '13', 'catorze': '14',
+            'quinze': '15', 'setze': '16', 'disset': '17', 'divuit': '18', 'dinou': '19',
+            'vint': '20'
+        };
+        text = text.replace(/\b(zero|un|dos|tres|quatre|cinc|sis|set|vuit|nou|deu|onze|dotze|tretze|catorze|quinze|setze|disset|divuit|dinou|vint)\b/g, 
+            (match) => numerics[match] || match);
+
+        // 4. Eliminar apòstrofs i la lletra anterior (d', l', m', s', n')
+        text = text.replace(/\b([dlmsn])'([a-z0-9])/g, (match, lletra, segona) => segona);
+
+        // 5. Substituir abreviatures comunes
+        const subs = [
+            [/\bc\//g, 'carrer'],
+            [/\bav\.?\b/g, 'avinguda'],
+            [/\bpg\.?\b/g, 'passeig'],
+            [/\bpl\.?\b/g, 'placa'],
+            [/\br amb\b/g, 'rambla'],
+            [/\bptge\.?\b/g, 'passatge'],
+            [/\bcami\b/g, 'camí'],
+            [/\bctra\.?\b/g, 'carretera'],
+            [/\bpasatge\b/g, 'passatge']
+        ];
+        subs.forEach(([pat, rep]) => text = text.replace(pat, rep));
+
+        // 6. Eliminar paraules buides (preposicions, articles, etc.)
+        const stopWords = ['de', 'la', 'el', 'els', 'les', 'd', 'l', 'i', 'en', 'a', 'per', 'amb', 'entre', 'sobre', 'sense'];
+        const paraules = text.split(/\s+/);
+        const paraulesFiltrades = paraules.filter(p => !stopWords.includes(p) && p.length > 0);
+        text = paraulesFiltrades.join(' ');
+
+        // 7. Eliminar caràcters especials i reduir espais
+        text = text.replace(/[^\w\s]/g, '');
+        text = text.replace(/\s+/g, ' ').trim();
+
+        return text;
+    }
+
+    // Cerca per paraules clau (fallback) amb prioritat per números
+    function coincideixPerParaules(text1, text2, prioritzarNumero = false) {
+        const p1 = text1.split(/\s+/);
+        const p2 = text2.split(/\s+/);
+        if (p1.length === 0 || p2.length === 0) return false;
+
+        // Si prioritzem número, comprovem que el número estigui present a text2
+        if (prioritzarNumero) {
+            const numeros = p1.filter(p => /^\d+$/.test(p));
+            if (numeros.length > 0) {
+                const teNumero = numeros.some(n => p2.includes(n));
+                if (!teNumero) return false;
+            }
+        }
+
+        const interseccio = p1.filter(p => p2.includes(p));
+        const ratio = Math.min(interseccio.length / p1.length, interseccio.length / p2.length);
+        return ratio >= 0.6;
+    }
+
+    // ---------- FUNCIONS DE CERCA ----------
+    function extreurePortal(adreca) {
+        // Busca el darrer número al final de la cadena (després d'un espai)
+        const match = adreca.match(/\s+(\d+)$/);
+        if (match) {
+            const num = parseInt(match[1], 10);
+            const nom = adreca.slice(0, adreca.lastIndexOf(match[1])).trim();
+            return { numero: num, nomCarrer: nom };
+        }
+        // Si no acaba en número, retornem null com a portal i la cadera sencera com a nom
+        return { numero: null, nomCarrer: adreca.trim() };
+    }
+
+    function dinsInterval(num, intervalStr) {
+        if (!intervalStr) return false;
+        const parts = intervalStr.split('-');
+        if (parts.length === 2) {
+            const ini = parseInt(parts[0], 10);
+            const fi = parseInt(parts[1], 10);
+            if (!isNaN(ini) && !isNaN(fi)) return num >= ini && num <= fi;
+        } else {
+            const val = parseInt(intervalStr, 10);
+            if (!isNaN(val)) return num === val;
+        }
+        return false;
+    }
+
+    function buscarCap(adrecaCompleta) {
+        // 1. Extreure el portal i el nom del carrer
+        const { numero: portal, nomCarrer } = extreurePortal(adrecaCompleta);
+
+        // 2. Normalitzar el nom del carrer
+        const nomNorm = normalitzar(nomCarrer);
+
+        // 3. Detectar si el nom original conté "vuit" o "8" (per a prioritzar)
+        const contéNumeroNom = /(^|\s)(vuit|8)($|\s)/i.test(nomCarrer);
+
+        // 4. Buscar coincidències
+        let coincidencies = CARRERS.filter(reg => normalitzar(reg.carrer) === nomNorm);
+
+        if (coincidencies.length === 0) {
+            // Si no hi ha coincidència exacta, provem per paraules clau, prioritzant números si cal
+            coincidencies = CARRERS.filter(reg => {
+                const regNorm = normalitzar(reg.carrer);
+                return coincideixPerParaules(nomNorm, regNorm, contéNumeroNom);
+            });
+        }
+
+        if (coincidencies.length === 0) {
+            return { cap: null, missatge: "Carrer no trobat a la base de dades." };
+        }
+
+        // Si no hi ha portal, retornem el primer CAP
+        if (portal === null) {
+            const primer = coincidencies[0];
+            const capInfo = CAPS.find(c => c.ABS === primer.cap);
+            return { cap: primer.cap, centre: capInfo ? capInfo.Centre : '', adreca: capInfo ? capInfo.Adreça : '', barris: capInfo ? capInfo.Barris : [], missatge: null };
+        }
+
+        // Buscar per interval de números
+        for (const reg of coincidencies) {
+            const interval = (portal % 2 === 0) ? reg.parells : reg.senars;
+            if (dinsInterval(portal, interval)) {
+                const capInfo = CAPS.find(c => c.ABS === reg.cap);
+                return { cap: reg.cap, centre: capInfo ? capInfo.Centre : '', adreca: capInfo ? capInfo.Adreça : '', barris: capInfo ? capInfo.Barris : [], missatge: null };
+            }
+        }
+
+        return { cap: null, missatge: "Número no assignat a cap CAP per a aquest carrer." };
+    }
+
+    // ---------- INTERACCIÓ ----------
+    const input = document.getElementById('adrecaInput');
+    const btn = document.getElementById('cercarBtn');
+    const resultDiv = document.getElementById('result');
+    const resultContent = document.getElementById('resultContent');
+
+    function cercar() {
+        const adreca = input.value.trim();
+        if (!adreca) {
+            resultDiv.className = 'result error';
+            resultContent.innerHTML = '<span class="error-msg">⚠️ Si us plau, introdueix una adreça.</span>';
+            resultDiv.style.display = 'block';
+            return;
+        }
+        const resultat = buscarCap(adreca);
+        if (resultat.cap) {
+            resultDiv.className = 'result success';
+            let html = `<div class="cap-nom">🏥 ${resultat.cap}</div>`;
+            if (resultat.centre) {
+                html += `<div class="cap-centre">${resultat.centre}</div>`;
+            }
+            html += `<div class="cap-adreca">📍 ${resultat.adreca}</div>`;
+            if (resultat.barris && resultat.barris.length > 0) {
+                html += `<div class="barris"><details><summary>📋 Barris que cobreix aquest CAP</summary><ul>`;
+                resultat.barris.forEach(b => html += `<li>${b}</li>`);
+                html += `</ul></details></div>`;
+            }
+            resultContent.innerHTML = html;
+        } else {
+            resultDiv.className = 'result error';
+            resultContent.innerHTML = `<span class="error-msg">❌ ${resultat.missatge}</span>`;
+        }
+        resultDiv.style.display = 'block';
+    }
+
+    btn.addEventListener('click', cercar);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') cercar();
+    });
+</script>
+</body>
+</html>
